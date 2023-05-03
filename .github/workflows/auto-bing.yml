@@ -12,15 +12,21 @@ jobs:
     # checkout
     - name: checkout
       uses: actions/checkout@v2
+    - uses: szenius/set-timezone@v1.0 # 设置执行环境的时区
+      with:
+        timezoneLinux: "Asia/Shanghai"
     # setup nodejs
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
         node-version: 12.x
-    - run: node ./assets/js/bing.js
+    - run: |
+        cd mycpen.cn
+        node ./assets/js/bing.js
     # commit
     - name: commit file
       run: |
+        cd -
         git config --local user.email 'github-actions[bot]@users.noreply.github.com'
         git config --local user.name 'github-actions[bot]'
         git diff --exit-code || git add . && git commit -am "$(date +'%Y/%m/%d')" --allow-empty
