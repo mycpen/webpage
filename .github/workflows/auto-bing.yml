@@ -23,6 +23,9 @@ jobs:
     - run: |
         cd mycpen.cn
         node ./assets/js/bing.js
+        cd ../cpen.top
+        node ./assets/js/bing.js
+        cd ..
     # commit
     - name: commit file
       run: |
