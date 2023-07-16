@@ -9,31 +9,39 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    # checkout
-    - name: checkout
-      uses: actions/checkout@v2
-    - uses: szenius/set-timezone@v1.0 # 设置执行环境的时区
-      with:
-        timezoneLinux: "Asia/Shanghai"
-    # setup nodejs
-    - name: Use Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 12.x
-    - run: |
-        cd mycpen.cn
-        node ./assets/js/bing.js
-        cd ../cpen.top
-        node ./assets/js/bing.js
-        cd ..
-    # commit
-    - name: commit file
-      run: |
-        git config --local user.email 'github-actions[bot]@users.noreply.github.com'
-        git config --local user.name 'github-actions[bot]'
-        git diff --exit-code || git add . && git commit -am "$(date +'%Y/%m/%d')" --allow-empty
-    # push 
-    - name: push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GH_TOKEN }}
+      # checkout
+      - name: checkout
+        uses: actions/checkout@v2
+      - uses: szenius/set-timezone@v1.0 # 设置执行环境的时区
+        with:
+          timezoneLinux: "Asia/Shanghai"
+      # setup nodejs
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+      - run: |
+          cd mycpen.cn
+          node ./assets/js/bing.js
+          cd ../cpen.top
+          node ./assets/js/bing.js
+          cd ..
+      # commit
+      - name: commit file
+        run: |
+          git config --local user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --local user.name 'github-actions[bot]'
+          git diff --exit-code || git add . && git commit -am "$(date +'%Y/%m/%d')" --allow-empty
+      # push 
+      - name: push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 30
+          keep_minimum_runs: 6
