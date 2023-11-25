@@ -2,7 +2,7 @@
 
 ## 1. mycpen.cn
 
-网址：[mycpen.cn](https://www.mycpen.cn/)
+网址：[mycpen.cn](https://mycpen.cn/)
 
 源码：[dmego/home.github.io](https://github.com/dmego/home.github.io)
 
