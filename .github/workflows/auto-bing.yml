@@ -1,0 +1,65 @@
+name: Auto Update Bing Images CI
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 17 * * 5" # 周六 1:00
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout
+      - name: checkout
+        uses: actions/checkout@v2
+      - uses: szenius/set-timezone@v1.0 # 设置执行环境的时区
+        with:
+          timezoneLinux: "Asia/Shanghai"
+      # setup nodejs
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - run: |
+          cd mycpen.cn
+          node ./assets/js/bing.js
+          cd ../cpen.top
+          node ./assets/js/bing.js
+          cd ..
+      # commit
+      - name: commit file
+        run: |
+          git config --local user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --local user.name 'github-actions[bot]'
+          git diff --exit-code || git add . && git commit -am "$(date +'%Y/%m/%d')" --allow-empty
+      # push 
+      - name: push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      # 发包 npm publish | autopublish.yml
+      - name: Change npm package version
+        run: |
+          python .github/scripts/change-package-version.py
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "18.x"
+          registry-url: https://registry.npmjs.org/
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - name: Wait for 3 minutes
+        run: sleep 180 # 等待 3 分钟，单位为秒
+      - name: Sync package from npm to npmmirror
+        run: |
+          npm install -g cnpm --registry=https://registry.npmmirror.com
+          cnpm sync mycpen-webpage
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 30
+          keep_minimum_runs: 6
